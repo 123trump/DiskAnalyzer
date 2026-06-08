@@ -161,6 +161,5 @@ DiskAnalyzer/
 
 ## License
 
-No license has been selected yet. If you want others to use, modify, or
-redistribute this project, add a `LICENSE` file before publishing a formal
-release. MIT is a common choice for small open-source tools.
+MIT LICENSE
+

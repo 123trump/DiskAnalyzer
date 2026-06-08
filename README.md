@@ -159,21 +159,8 @@ DiskAnalyzer/
 - Generated folders such as `__pycache__/`, `dist/`, `build/`, and local
   snapshot files should normally be ignored by Git.
 
-## Suggested `.gitignore`
-
-```gitignore
-__pycache__/
-*.pyc
-build/
-dist/
-*.spec
-snapshots/*.json
-```
-
 ## License
 
-Choose a license before publishing, for example MIT:
-
-```text
-MIT License
-```
+No license has been selected yet. If you want others to use, modify, or
+redistribute this project, add a `LICENSE` file before publishing a formal
+release. MIT is a common choice for small open-source tools.

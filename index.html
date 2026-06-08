@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Disk Analyzer</title>
+  <link rel="stylesheet" href="static/styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#mainContent" data-i18n="skipResults">Skip to results</a>
+  <main class="container">
+    <header class="app-header">
+      <div>
+        <h1>Disk <span>Analyzer</span></h1>
+        <p class="app-subtitle" id="statusText" aria-live="polite" data-i18n="statusReady">Ready</p>
+      </div>
+      <div class="app-actions">
+        <label class="header-field" for="selTheme">
+          <span data-i18n="theme">Theme</span>
+          <select id="selTheme">
+            <option value="dark" data-i18n="themeDark">Dark</option>
+            <option value="light" data-i18n="themeLight">Light</option>
+          </select>
+        </label>
+        <label class="header-field" for="selLanguage">
+          <span data-i18n="language">Language</span>
+          <select id="selLanguage">
+            <option value="en" data-i18n="languageEnglish">English</option>
+            <option value="zh" data-i18n="languageChinese">中文</option>
+          </select>
+        </label>
+        <button class="btn-outline btn-small hidden" id="btnSave" data-i18n="saveSnapshot">Save Snapshot</button>
+      </div>
+    </header>
+
+    <section class="scan-bar" aria-label="Scan controls" data-i18n-aria="scanControls">
+      <div class="field field-path">
+        <label for="scanPath" data-i18n="directory">Directory</label>
+        <div class="path-picker">
+          <input
+            type="text"
+            id="scanPath"
+            placeholder="C:\Users\sgl\AppData\Local"
+            autocomplete="off"
+          >
+          <button class="btn-outline" id="btnBrowse" type="button" data-i18n="browse">Browse</button>
+        </div>
+      </div>
+      <div class="field field-depth">
+        <label for="scanDepth" data-i18n="depth">Depth</label>
+        <select id="scanDepth">
+          <option value="1" data-i18n="depth1">1 level</option>
+          <option value="2" selected data-i18n="depth2">2 levels</option>
+          <option value="3" data-i18n="depth3">3 levels</option>
+        </select>
+      </div>
+      <button class="btn-primary" id="btnScan" data-i18n="scan">Scan</button>
+    </section>
+
+    <section class="snap-panel">
+      <button class="snap-header" id="snapToggle" type="button" aria-expanded="false">
+        <h2><span data-i18n="savedSnapshots">Saved Snapshots</span> <span id="snapCount"></span></h2>
+        <span class="arrow" aria-hidden="true">&#9654;</span>
+      </button>
+      <div class="snap-body" id="snapBody">
+        <div class="snap-list" id="snapList"></div>
+        <div class="compare-bar">
+          <label for="selBase" data-i18n="baseline">Baseline:</label>
+          <select id="selBase"><option value="">-- select --</option></select>
+          <label for="selComp" data-i18n="compareLabel">Compare:</label>
+          <select id="selComp"><option value="">-- select --</option></select>
+          <button class="btn-primary btn-small" id="btnCompare" data-i18n="compare">Compare</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="emptyState" class="empty-state">
+      <div class="empty-icon" aria-hidden="true"></div>
+      <h2 data-i18n="noScanLoaded">No scan loaded</h2>
+      <p data-i18n="emptyHint">Choose a directory to inspect its storage footprint.</p>
+    </section>
+
+    <section id="mainContent" class="hidden">
+      <nav class="breadcrumb" id="breadcrumb" aria-label="Breadcrumb" data-i18n-aria="breadcrumb"></nav>
+      <div class="scan-meta" id="scanMeta"></div>
+      <div class="cards" id="cards"></div>
+
+      <div class="tab-bar" id="tabs" role="tablist">
+        <button class="tab active" data-tab="treemap" type="button" data-i18n="tabTreemap">Treemap</button>
+        <button class="tab" data-tab="bar" type="button" data-i18n="tabBar">Bar Chart</button>
+        <button class="tab" data-tab="changes" type="button" data-i18n="tabChanges">Changes</button>
+        <button class="tab" data-tab="table" type="button" data-i18n="tabTable">Table</button>
+      </div>
+
+      <div class="controls" id="controls">
+        <label for="selTop" data-i18n="show">Show:</label>
+        <select id="selTop">
+          <option value="15" data-i18n="top15">Top 15</option>
+          <option value="25" selected data-i18n="top25">Top 25</option>
+          <option value="50" data-i18n="top50">Top 50</option>
+          <option value="999" data-i18n="all">All</option>
+        </select>
+
+        <label for="selColor" data-i18n="color">Color:</label>
+        <select id="selColor">
+          <option value="size" data-i18n="size">Size</option>
+          <option value="growth" data-i18n="growth">Growth</option>
+          <option value="shrink" data-i18n="shrink">Shrink</option>
+        </select>
+
+        <label for="selChangeView" data-i18n="changeView">Change View:</label>
+        <select id="selChangeView">
+          <option value="direct" selected data-i18n="directCauses">Direct causes</option>
+          <option value="folders" data-i18n="foldersSummary">Folders summary</option>
+          <option value="all" data-i18n="allDetails">All details</option>
+        </select>
+      </div>
+
+      <section class="panel visible" id="pTreemap">
+        <div class="treemap-container">
+          <div class="treemap-wrap" id="treemap"></div>
+          <div class="legend-row" id="treemapLegend"></div>
+        </div>
+      </section>
+
+      <section class="panel" id="pBar">
+        <div class="chart-box">
+          <h2 data-i18n="largestDirectories">Largest Directories</h2>
+          <canvas id="barChart" aria-label="Largest directories bar chart" role="img" data-i18n-aria="largestDirectoriesChart">
+            Largest directories are also available in the table view.
+          </canvas>
+        </div>
+      </section>
+
+      <section class="panel" id="pChanges">
+        <div class="chart-box">
+          <h2 data-i18n="biggestChanges">Biggest Changes</h2>
+          <canvas id="changeChart" aria-label="Biggest storage changes bar chart" role="img" data-i18n-aria="biggestChangesChart">
+            Storage changes are also available in the table view.
+          </canvas>
+        </div>
+        <div class="tbl-box">
+          <div class="th-row">
+            <h2 data-i18n="changeSources">Change Sources</h2>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead id="changeHead"></thead>
+              <tbody id="changeBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel" id="pTable">
+        <div class="tbl-box">
+          <div class="th-row">
+            <h2 data-i18n="allDirectories">All Directories</h2>
+            <input type="text" id="searchInput" placeholder="Search..." data-i18n-placeholder="searchPlaceholder">
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead id="tblHead"></thead>
+              <tbody id="tblBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <div class="loading-overlay" id="loading">
+    <div class="spinner"></div>
+    <p id="loadingMsg" data-i18n="scanning">Scanning...</p>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <script src="static/app.js"></script>
+</body>
+</html>
